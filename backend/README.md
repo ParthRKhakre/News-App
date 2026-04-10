@@ -1,13 +1,27 @@
-# Fake News Detection - FastAPI Backend
+# Tez News Backend
 
-This is the production-ready backend connecting the advanced ML Pipeline with REST API Endpoints. It incorporates predictive machine learning interfaces, early-stage blockchain configuration services, and JWT authentication structures. 
+FastAPI backend for Tez News. It handles authentication, prediction, Gemini-assisted analysis, analytics, and blockchain verification.
 
-## Run the API
-1. Install requirements:
-`pip install -r requirements.txt`
-2. Start the Uvicorn Server:
-`uvicorn app.main:app --reload`
-3. Access API docs at `http://localhost:8000/docs`.
+## Responsibilities
+
+- JWT-based auth
+- user persistence via SQLite
+- ML prediction requests
+- Gemini assistant integration
+- analytics aggregation
+- blockchain write and verification bridge
+- public verification lookup by hash
+
+## Run Locally
+
+```powershell
+pip install -r requirements.txt
+py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+API docs:
+
+- [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## Environment
 
@@ -26,18 +40,26 @@ Copy [backend/.env.example](C:/Users/parth/Downloads/News%20App/backend/.env.exa
 - `GEMINI_TIMEOUT_SECONDS`
 - `GEMINI_USE_GOOGLE_SEARCH`
 
-For production:
+## Key Endpoints
 
-- do not use the default `SECRET_KEY`
-- mount a persistent disk and point `SQLITE_PATH` to it
-- store all secrets only in the provider secret store
+- `GET /health`
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /profile`
+- `POST /predict`
+- `POST /predict-and-store`
+- `GET /analytics`
+- `GET /verify/{hash}`
 
-## Integration Capabilities
-- `/predict` calculates contextual models on text parameters for FAKE vs REAL responses.
-- Models are initialized via the Singleton sequence during FastAPI startup (zero-cost on user hit).
+## Notes
+
+- `/predict-and-store` returns the transaction hash immediately; block confirmation can still be pending
+- Gemini analysis depends on your configured project quota and access
+- production startup enforces a non-default `SECRET_KEY`
 
 ## Deployment
 
-For Sepolia rollout and cloud deployment steps, see:
+See:
 
 - [DEPLOYMENT_SEPOLIA.md](C:/Users/parth/Downloads/News%20App/DEPLOYMENT_SEPOLIA.md)
+- [DEPLOYMENT_CLOUD.md](C:/Users/parth/Downloads/News%20App/DEPLOYMENT_CLOUD.md)
