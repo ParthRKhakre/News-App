@@ -5,23 +5,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#101828",
+        ink: "#0F172A",
         mist: "#F8FAFC",
-        fake: "#EF4444",
-        real: "#22C55E",
+        fake: "#DC2626",
+        real: "#16A34A",
         ember: "#F97316",
-        sand: "#FFF7ED"
+        sand: "#F8FAFC"
       },
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
-        body: ["DM Sans", "sans-serif"]
+        display: ["Manrope", "sans-serif"],
+        body: ["Inter", "sans-serif"]
       },
       boxShadow: {
-        card: "0 25px 60px rgba(15, 23, 42, 0.16)"
+        card: "0 24px 60px rgba(15, 23, 42, 0.12)"
       },
       backgroundImage: {
         "hero-mesh":
-          "radial-gradient(circle at top left, rgba(249,115,22,0.2), transparent 36%), radial-gradient(circle at bottom right, rgba(16,24,40,0.14), transparent 42%)"
+          "radial-gradient(circle at top left, rgba(37,99,235,0.16), transparent 32%), radial-gradient(circle at top right, rgba(6,182,212,0.12), transparent 20%), radial-gradient(circle at bottom right, rgba(15,23,42,0.08), transparent 38%)"
       }
     }
   },

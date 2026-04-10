@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 import Button from "@/components/common/Button";
 import PredictionBadge from "@/components/feed/PredictionBadge";
+import { useAuth } from "@/hooks/useAuth";
 
 function highlightText(text, importantWords = []) {
   if (!text) {
@@ -26,6 +27,8 @@ function highlightText(text, importantWords = []) {
 }
 
 export default function ResultModal({ open, result, onClose }) {
+  const { pushToast, toggleBookmark, isBookmarked } = useAuth();
+
   useEffect(() => {
     if (!open) {
       return undefined;
@@ -44,6 +47,42 @@ export default function ResultModal({ open, result, onClose }) {
   if (!open || !result) {
     return null;
   }
+
+  const summary =
+    result.summary ||
+    result.ai_analysis?.summary ||
+    "A short summary could not be generated for this article.";
+  const bookmarked = isBookmarked({
+    content: result.text,
+    headline: result.headline
+  });
+
+  const handleShare = async () => {
+    const shareText = [
+      `Tez News verification report`,
+      result.headline ? `Headline: ${result.headline}` : null,
+      `Prediction: ${result.label} (${Math.round((result.confidence || 0) * 100)}%)`,
+      summary,
+      result.hash ? `Verification ID: ${result.hash}` : null,
+      result.txHash ? `Transaction hash: ${result.txHash}` : null
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: result.headline || "Tez News verification report",
+          text: shareText
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        pushToast("Verification report copied to clipboard.", "success");
+      }
+    } catch {
+      pushToast("Unable to share this verification right now.", "error");
+    }
+  };
 
   return (
     <div
@@ -81,6 +120,25 @@ export default function ResultModal({ open, result, onClose }) {
             <span className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200">
               Confidence {Math.round((result.confidence || 0) * 100)}%
             </span>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                toggleBookmark(
+                  {
+                    content: result.text,
+                    headline: result.headline,
+                    source: "Verification result",
+                    category: "Saved"
+                  },
+                  result
+                )
+              }
+            >
+              {bookmarked ? "Saved" : "Save for later"}
+            </Button>
+            <Button variant="ghost" onClick={handleShare}>
+              Share report
+            </Button>
             <Button variant="ghost" onClick={onClose} className="ml-auto">
               Close
             </Button>
@@ -88,6 +146,13 @@ export default function ResultModal({ open, result, onClose }) {
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
             <div className="space-y-6">
+              <div className="rounded-3xl bg-blue-50 p-5 dark:bg-slate-800">
+                <p className="text-sm font-semibold text-ink dark:text-white">News summary</p>
+                <p className="mt-3 text-sm leading-7 text-slate-700 dark:text-slate-300">
+                  {summary}
+                </p>
+              </div>
+
               <div className="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
                 <p className="text-sm font-semibold text-ink dark:text-white">
                   Why this is {result.label}

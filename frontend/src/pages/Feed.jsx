@@ -6,7 +6,7 @@ import ResultModal from "@/components/modals/ResultModal";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Feed() {
-  const { feedItems, predictionCache, requestPrediction } = useAuth();
+  const { feedItems, predictionCache, requestPrediction, toggleBookmark, isBookmarked } = useAuth();
   const [activeResult, setActiveResult] = useState(null);
   const [blockchainResult, setBlockchainResult] = useState(null);
   const [loadingArticleId, setLoadingArticleId] = useState(null);
@@ -65,6 +65,8 @@ export default function Feed() {
         getLoadingAction={(article) =>
           loadingArticleId === article.id ? loadingMode : null
         }
+        isBookmarked={isBookmarked}
+        onToggleBookmark={toggleBookmark}
         onOpen={handleOpenArticle}
         onVerify={handleVerify}
         onVerifyAndStore={handleVerifyAndStore}

@@ -3,6 +3,7 @@ import { createContext, startTransition, useCallback, useEffect, useMemo, useSta
 import { seededNews } from "@/data/newsSeed";
 import { analyticsApi, authApi, blockchainApi, predictionApi } from "@/services/api";
 import {
+  BOOKMARKS_KEY,
   CACHE_KEY,
   CUSTOM_NEWS_KEY,
   HISTORY_KEY,
@@ -15,6 +16,21 @@ import {
 import { applyTheme, getStoredTheme } from "@/utils/theme";
 
 export const AuthContext = createContext(null);
+
+function summarizeText(text, aiAnalysis) {
+  if (aiAnalysis?.summary && !/currently unavailable/i.test(aiAnalysis.summary)) {
+    return aiAnalysis.summary.trim();
+  }
+
+  const normalized = String(text || "").replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return "No summary available.";
+  }
+
+  const sentenceMatches = normalized.match(/[^.!?]+[.!?]?/g) || [];
+  const summary = sentenceMatches.slice(0, 2).join(" ").trim();
+  return summary.length > 220 ? `${summary.slice(0, 217).trim()}...` : summary;
+}
 
 function normalizeAxiosError(error, fallback) {
   if (error?.code === "ECONNABORTED" || String(error?.message || "").includes("timeout")) {
@@ -34,6 +50,7 @@ export function AuthProvider({ children }) {
   const [history, setHistory] = useState(() => readJSON(HISTORY_KEY, []));
   const [customNews, setCustomNews] = useState(() => readJSON(CUSTOM_NEWS_KEY, []));
   const [predictionCache, setPredictionCache] = useState(() => readJSON(CACHE_KEY, {}));
+  const [bookmarks, setBookmarks] = useState(() => readJSON(BOOKMARKS_KEY, []));
   const [bootstrapping, setBootstrapping] = useState(true);
   const [toast, setToast] = useState(null);
   const [theme, setTheme] = useState(() => getStoredTheme());
@@ -79,6 +96,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     writeJSON(CACHE_KEY, predictionCache);
   }, [predictionCache]);
+
+  useEffect(() => {
+    writeJSON(BOOKMARKS_KEY, bookmarks);
+  }, [bookmarks]);
 
   const pushToast = useCallback((message, type = "info") => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -154,6 +175,53 @@ export function AuthProvider({ children }) {
     return item;
   }, []);
 
+  const isBookmarked = useCallback((article) => {
+    if (!article?.content) {
+      return false;
+    }
+    const key = getPredictionKey(article.content);
+    return bookmarks.some((item) => item.key === key);
+  }, [bookmarks]);
+
+  const toggleBookmark = useCallback((article, result = null) => {
+    if (!article?.content) {
+      return false;
+    }
+
+    const key = getPredictionKey(article.content);
+    const nextSummary = summarizeText(article.content, result?.ai_analysis);
+    const alreadyBookmarked = bookmarks.some((item) => item.key === key);
+
+    startTransition(() => {
+      setBookmarks((currentBookmarks) => {
+        const existingIndex = currentBookmarks.findIndex((item) => item.key === key);
+        if (existingIndex >= 0) {
+          return currentBookmarks.filter((item) => item.key !== key);
+        }
+
+        return [
+          {
+            key,
+            headline: article.headline || article.text?.slice(0, 80) || "Saved article",
+            content: article.content || article.text || "",
+            source: article.source || "Saved from verification",
+            category: article.category || "Saved",
+            savedAt: new Date().toISOString(),
+            label: result?.label || article.label || null,
+            confidence: result?.confidence ?? article.confidence ?? null,
+            summary: nextSummary,
+            txHash: result?.txHash || article.txHash || null,
+            verificationId: result?.hash || article.hash || null
+          },
+          ...currentBookmarks
+        ];
+      });
+    });
+
+    pushToast(alreadyBookmarked ? "Removed from saved items." : "Saved for later.", "success");
+    return !alreadyBookmarked;
+  }, [bookmarks, pushToast]);
+
   const requestPrediction = useCallback(async (text, options = { store: false, headline: "" }) => {
     const key = getPredictionKey(text);
     if (!options.store && predictionCache[key]) {
@@ -166,10 +234,12 @@ export function AuthProvider({ children }) {
         : await predictionApi.predict({ text });
 
       const result = response.data;
+      const summary = summarizeText(text, result.ai_analysis);
       const cacheableResult = {
         ...result,
         text,
-        headline: options.headline
+        headline: options.headline,
+        summary
       };
 
       startTransition(() => {
@@ -182,13 +252,21 @@ export function AuthProvider({ children }) {
       recordHistory({
         headline: options.headline || text.slice(0, 60),
         text,
+        summary,
         label: result.label,
         confidence: result.confidence,
         txHash: result.txHash || null,
-        verificationId: result.hash || null
+        verificationId: result.hash || null,
+        blockNumber: result.blockNumber ?? null,
+        blockchainStatus: options.store
+          ? (result.blockNumber == null ? "pending" : "confirmed")
+          : "prediction"
       });
 
-      return result;
+      return {
+        ...result,
+        summary
+      };
     } catch (error) {
       const message = normalizeAxiosError(error, "Request failed. Please try again.");
       pushToast(message, "error");
@@ -251,6 +329,7 @@ export function AuthProvider({ children }) {
       customNews,
       feedItems,
       predictionCache,
+      bookmarks,
       bootstrapping,
       toast,
       theme,
@@ -262,11 +341,13 @@ export function AuthProvider({ children }) {
       pushToast,
       requestPrediction,
       saveCustomNews,
+      toggleBookmark,
+      isBookmarked,
       refreshProfile,
       fetchAnalytics,
       verifyHash,
     }),
-    [token, user, history, customNews, feedItems, predictionCache, bootstrapping, toast, theme]
+    [token, user, history, customNews, feedItems, predictionCache, bookmarks, bootstrapping, toast, theme, isBookmarked, toggleBookmark]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

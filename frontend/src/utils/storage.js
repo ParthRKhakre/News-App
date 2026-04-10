@@ -3,6 +3,7 @@ export const USER_KEY = "truthlens_user";
 export const HISTORY_KEY = "truthlens_history";
 export const CUSTOM_NEWS_KEY = "truthlens_custom_news";
 export const CACHE_KEY = "truthlens_prediction_cache";
+export const BOOKMARKS_KEY = "truthlens_bookmarks";
 
 export function readJSON(key, fallback) {
   try {
