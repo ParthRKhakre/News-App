@@ -137,14 +137,14 @@ def test_signup_login_and_protected_predict_and_store():
     with TestClient(app) as client:
         signup_response = client.post(
             "/auth/signup",
-            json={"username": "reporter1", "password": "secret123", "role": "reporter"},
+            json={"username": "user1", "password": "secret123", "role": "admin"},
         )
         assert signup_response.status_code == 200
         token = signup_response.json()["access_token"]
 
         login_response = client.post(
             "/auth/login",
-            json={"username": "reporter1", "password": "secret123"},
+            json={"username": "user1", "password": "secret123"},
         )
         assert login_response.status_code == 200
 
@@ -153,18 +153,36 @@ def test_signup_login_and_protected_predict_and_store():
             headers={"Authorization": f"Bearer {token}"},
         )
         assert profile_response.status_code == 200
-        assert profile_response.json()["username"] == "reporter1"
-
-        analytics_response = client.get(
-            "/analytics",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        assert analytics_response.status_code == 200
-        assert analytics_response.json()["total_checked"] >= 0
+        assert profile_response.json()["username"] == "user1"
+        assert profile_response.json()["role"] == "user"
 
         protected_response = client.post(
             "/predict-and-store",
             json={"text": "A protected prediction call"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert protected_response.status_code == 403
+
+
+def test_reporter_can_predict_and_store_but_not_access_admin_analytics():
+    user_store.create_user("reporter1", "secret123", "reporter")
+
+    with TestClient(app) as client:
+        login_response = client.post(
+            "/auth/login",
+            json={"username": "reporter1", "password": "secret123"},
+        )
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+
+        protected_response = client.post(
+            "/predict-and-store",
+            json={"text": "A protected prediction call"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        analytics_response = client.get(
+            "/analytics",
             headers={"Authorization": f"Bearer {token}"},
         )
 
@@ -174,6 +192,7 @@ def test_signup_login_and_protected_predict_and_store():
     assert body["txHash"].startswith("0x")
     assert body["blockNumber"] == 101
     assert body["label"] == "REAL"
+    assert analytics_response.status_code == 403
 
 
 def test_verify_endpoint_returns_blockchain_record():
@@ -187,22 +206,31 @@ def test_verify_endpoint_returns_blockchain_record():
 
 
 def test_analytics_endpoint_counts_predictions():
+    user_store.create_user("admin1", "secret123", "admin")
+    user_store.create_user("reporter2", "secret123", "reporter")
+
     with TestClient(app) as client:
-        signup_response = client.post(
-            "/auth/signup",
-            json={"username": "analyst", "password": "secret123", "role": "user"},
+        login_response = client.post(
+            "/auth/login",
+            json={"username": "admin1", "password": "secret123"},
         )
-        token = signup_response.json()["access_token"]
+        admin_token = login_response.json()["access_token"]
+
+        reporter_login = client.post(
+            "/auth/login",
+            json={"username": "reporter2", "password": "secret123"},
+        )
+        reporter_token = reporter_login.json()["access_token"]
 
         client.post("/predict", json={"text": "Story one"})
         client.post(
             "/predict-and-store",
             json={"text": "Story two"},
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {reporter_token}"},
         )
         response = client.get(
             "/analytics",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
 
     assert response.status_code == 200

@@ -23,6 +23,20 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
+function RoleProtectedRoute({ children, allowedRoles }) {
+  const { isAuthenticated, bootstrapping, role } = useAuth();
+
+  if (bootstrapping) {
+    return <Loader fullScreen label="Preparing Tez News" />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return allowedRoles.includes(role) ? children : <Navigate to="/feed" replace />;
+}
+
 function PublicOnlyRoute({ children }) {
   const { isAuthenticated, bootstrapping } = useAuth();
 
@@ -63,8 +77,22 @@ export default function App() {
         >
           <Route index element={<Navigate to="/feed" replace />} />
           <Route path="feed" element={<Feed />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="submit" element={<SubmitNews />} />
+          <Route
+            path="dashboard"
+            element={
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <Dashboard />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="submit"
+            element={
+              <RoleProtectedRoute allowedRoles={["reporter", "admin"]}>
+                <SubmitNews />
+              </RoleProtectedRoute>
+            }
+          />
           <Route path="profile" element={<Profile />} />
         </Route>
         <Route path="/verify" element={<Verify />} />

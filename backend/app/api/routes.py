@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_role
 from app.core.security import create_access_token
 from app.schemas.request import PredictRequest, PredictStoreRequest, UserCreate, UserLogin
 from app.schemas.response import (
@@ -38,7 +38,7 @@ def profile(current_user: dict = Depends(get_current_user)) -> ProfileResponse:
 
 
 @router.get("/analytics", response_model=AnalyticsResponse, tags=["analytics"])
-def analytics(current_user: dict = Depends(get_current_user)) -> AnalyticsResponse:
+def analytics(current_user: dict = Depends(require_role("admin"))) -> AnalyticsResponse:
     return AnalyticsResponse(**analytics_service.get_summary())
 
 
@@ -77,7 +77,7 @@ def predict_news(payload: PredictRequest) -> PredictResponse:
 )
 def predict_and_store(
     payload: PredictStoreRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_role("reporter", "admin")),
 ) -> PredictStoreResponse:
     result = get_prediction(
         text=payload.text,
@@ -113,7 +113,7 @@ def signup(payload: UserCreate) -> Token:
         user = user_store.create_user(
             username=payload.username,
             password=payload.password,
-            role=payload.role or "user",
+            role="user",
         )
     except ValueError as exc:
         raise HTTPException(

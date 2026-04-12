@@ -35,6 +35,7 @@ function NewsCard({
   cachedResult,
   loadingAction,
   isBookmarked,
+  canStoreOnChain,
   onToggleBookmark,
   onOpen,
   onVerify,
@@ -180,13 +181,14 @@ function NewsCard({
               </Button>
               <Button
                 variant="secondary"
+                disabled={!canStoreOnChain}
                 loading={loadingAction === "store"}
                 onClick={(event) => {
                   event.stopPropagation();
                   onVerifyAndStore(article);
                 }}
               >
-                Verify & Store on-chain
+                {canStoreOnChain ? "Verify & Store on-chain" : "Reporter/Admin only"}
               </Button>
             </div>
           </div>

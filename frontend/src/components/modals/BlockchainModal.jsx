@@ -70,68 +70,72 @@ export default function BlockchainModal({ open, result, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-3 py-4 sm:px-4"
       onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className="relative w-full max-w-3xl rounded-[32px] bg-white p-6 shadow-card dark:bg-slate-900 sm:p-8"
+        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-5 shadow-card dark:bg-slate-900 sm:p-8"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-5 pr-14 dark:border-slate-800">
+          <div className="min-w-0">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ember">
               Blockchain Verification
             </p>
-            <h3 className="mt-3 font-display text-3xl font-bold text-ink dark:text-white">
+            <h3 className="mt-3 font-display text-2xl font-bold text-ink dark:text-white sm:text-3xl">
               Proof generated successfully
             </h3>
           </div>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} className="hidden sm:inline-flex">
             Close
           </Button>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-white"
+          className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-white"
         >
           X
         </button>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <PredictionBadge label={result.label} confidence={result.confidence} />
-          <span className={`rounded-full px-3 py-2 text-sm font-medium ${
-            pending
-              ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200"
-          }`}>
-            {pending ? "Transaction pending" : "Verification stored"}
-          </span>
-          <Button
-            variant="secondary"
-            onClick={() =>
-              toggleBookmark(
-                {
-                  content: result.text,
-                  headline: result.headline,
-                  source: "Blockchain verification",
-                  category: "Saved"
-                },
-                result
-              )
-            }
-          >
-            {bookmarked ? "Saved" : "Save for later"}
-          </Button>
-          <Button variant="ghost" onClick={handleShare}>
-            Share report
-          </Button>
-        </div>
+        <div className="mt-6 flex-1 overflow-y-auto pr-1">
+          <div className="flex flex-wrap items-stretch gap-3">
+            <PredictionBadge label={result.label} confidence={result.confidence} />
+            <span className={`inline-flex items-center rounded-full px-3 py-2 text-sm font-medium ${
+              pending
+                ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200"
+            }`}>
+              {pending ? "Transaction pending" : "Verification stored"}
+            </span>
+            <div className="grid w-full gap-3 sm:ml-auto sm:w-auto sm:grid-cols-2">
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() =>
+                  toggleBookmark(
+                    {
+                      content: result.text,
+                      headline: result.headline,
+                      source: "Blockchain verification",
+                      category: "Saved"
+                    },
+                    result
+                  )
+                }
+              >
+                {bookmarked ? "Saved" : "Save for later"}
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={handleShare}>
+                Share report
+              </Button>
+            </div>
+          </div>
 
-        <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-4">
           <div className="rounded-3xl bg-blue-50 p-5 dark:bg-slate-800">
             <p className="text-sm font-semibold text-slate-500">News summary</p>
             <p className="mt-2 text-sm leading-7 text-ink dark:text-white">{summary}</p>
@@ -167,6 +171,7 @@ export default function BlockchainModal({ open, result, onClose }) {
               </p>
             )}
           </div>
+        </div>
         </div>
       </motion.div>
     </div>

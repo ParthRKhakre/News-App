@@ -7,7 +7,7 @@ import ResultModal from "@/components/modals/ResultModal";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function SubmitNews() {
-  const { requestPrediction, saveCustomNews, pushToast } = useAuth();
+  const { requestPrediction, saveCustomNews, pushToast, canSubmitNews, canStoreOnChain } = useAuth();
   const [form, setForm] = useState({ headline: "", content: "" });
   const [errors, setErrors] = useState({});
   const [loadingMode, setLoadingMode] = useState(null);
@@ -59,6 +59,11 @@ export default function SubmitNews() {
 
   return (
     <section className="mx-auto max-w-4xl px-4 pb-32 pt-8 sm:px-6">
+      {!canSubmitNews ? (
+        <div className="mb-6 rounded-[32px] border border-amber-200 bg-amber-50 p-5 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          Only reporter and admin accounts can submit custom stories in this version of Tez News.
+        </div>
+      ) : null}
       <div className="rounded-[32px] bg-white p-6 shadow-card sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ember">
           Submit News
@@ -99,6 +104,7 @@ export default function SubmitNews() {
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <Button
             variant="secondary"
+            disabled={!canSubmitNews}
             loading={loadingMode === "predict"}
             onClick={() => handlePredict(false)}
           >
@@ -106,10 +112,11 @@ export default function SubmitNews() {
           </Button>
           <Button
             variant="primary"
+            disabled={!canStoreOnChain}
             loading={loadingMode === "store"}
             onClick={() => handlePredict(true)}
           >
-            Verify & Store
+            {canStoreOnChain ? "Verify & Store" : "Reporter/Admin only"}
           </Button>
         </div>
       </div>

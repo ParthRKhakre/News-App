@@ -7,6 +7,7 @@ function FeedContainer({
   getCachedResult,
   getLoadingAction,
   isBookmarked,
+  canStoreOnChain,
   onToggleBookmark,
   onOpen,
   onVerify,
@@ -21,6 +22,7 @@ function FeedContainer({
           cachedResult={getCachedResult(article)}
           loadingAction={getLoadingAction(article)}
           isBookmarked={isBookmarked(article)}
+          canStoreOnChain={canStoreOnChain}
           onToggleBookmark={onToggleBookmark}
           onOpen={onOpen}
           onVerify={onVerify}

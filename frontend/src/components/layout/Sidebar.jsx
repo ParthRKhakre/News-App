@@ -85,7 +85,16 @@ function NavItem({ link, collapsed, onNavigate }) {
 }
 
 export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) {
-  const { logout } = useAuth();
+  const { logout, canAccessAnalytics, canSubmitNews } = useAuth();
+  const visibleLinks = links.filter((link) => {
+    if (link.to === "/dashboard") {
+      return canAccessAnalytics;
+    }
+    if (link.to === "/submit") {
+      return canSubmitNews;
+    }
+    return true;
+  });
 
   return (
     <>
@@ -143,7 +152,7 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
         ) : null}
 
         <nav className={`flex flex-1 flex-col gap-2 ${collapsed ? "items-center" : ""}`}>
-          {links.map((link) => (
+          {visibleLinks.map((link) => (
             <NavItem
               key={link.to}
               link={link}

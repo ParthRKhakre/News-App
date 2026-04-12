@@ -147,6 +147,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const getPredictionKey = (text) => text.trim().toLowerCase();
+  const normalizedRole = (user?.role || "user").toLowerCase();
 
   const recordHistory = useCallback((entry) => {
     startTransition(() => {
@@ -320,6 +321,10 @@ export function AuthProvider({ children }) {
   }, [pushToast]);
 
   const feedItems = useMemo(() => [...customNews, ...seededNews], [customNews]);
+  const hasRole = useCallback((...roles) => roles.map((role) => role.toLowerCase()).includes(normalizedRole), [normalizedRole]);
+  const canAccessAnalytics = normalizedRole === "admin";
+  const canSubmitNews = normalizedRole === "admin" || normalizedRole === "reporter";
+  const canStoreOnChain = canSubmitNews;
 
   const value = useMemo(
     () => ({
@@ -333,7 +338,12 @@ export function AuthProvider({ children }) {
       bootstrapping,
       toast,
       theme,
+      role: normalizedRole,
       isAuthenticated: Boolean(token),
+      hasRole,
+      canAccessAnalytics,
+      canSubmitNews,
+      canStoreOnChain,
       signup,
       login,
       logout,
@@ -347,7 +357,7 @@ export function AuthProvider({ children }) {
       fetchAnalytics,
       verifyHash,
     }),
-    [token, user, history, customNews, feedItems, predictionCache, bookmarks, bootstrapping, toast, theme, isBookmarked, toggleBookmark]
+    [token, user, history, customNews, feedItems, predictionCache, bookmarks, bootstrapping, toast, theme, normalizedRole, hasRole, canAccessAnalytics, canSubmitNews, canStoreOnChain, isBookmarked, toggleBookmark]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
