@@ -84,6 +84,19 @@ export default function ResultModal({ open, result, onClose }) {
     }
   };
 
+  const handleCopy = async (value, label) => {
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      pushToast(`${label} copied to clipboard.`, "success");
+    } catch {
+      pushToast(`Unable to copy ${label.toLowerCase()} right now.`, "error");
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4"
@@ -307,6 +320,44 @@ export default function ResultModal({ open, result, onClose }) {
                   ))}
                 </div>
               </div>
+
+              {result.hash || result.txHash ? (
+                <div className="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
+                  <p className="text-sm font-semibold text-ink dark:text-white">Stored proof details</p>
+                  <div className="mt-4 space-y-4">
+                    {result.hash ? (
+                      <div className="rounded-2xl bg-white px-4 py-3 dark:bg-slate-900">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                            Verification hash
+                          </p>
+                          <Button variant="ghost" onClick={() => handleCopy(result.hash, "Verification hash")}>
+                            Copy
+                          </Button>
+                        </div>
+                        <p className="mt-2 break-all font-mono text-sm text-slate-600 dark:text-slate-300">
+                          {result.hash}
+                        </p>
+                      </div>
+                    ) : null}
+                    {result.txHash ? (
+                      <div className="rounded-2xl bg-white px-4 py-3 dark:bg-slate-900">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                            Transaction hash
+                          </p>
+                          <Button variant="ghost" onClick={() => handleCopy(result.txHash, "Transaction hash")}>
+                            Copy
+                          </Button>
+                        </div>
+                        <p className="mt-2 break-all font-mono text-sm text-slate-600 dark:text-slate-300">
+                          {result.txHash}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

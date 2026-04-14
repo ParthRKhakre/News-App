@@ -14,7 +14,9 @@ test("submit news page validates short content", async () => {
         value={{
           requestPrediction: vi.fn(),
           saveCustomNews: vi.fn(),
-          pushToast: vi.fn()
+          pushToast: vi.fn(),
+          canSubmitNews: true,
+          canStoreOnChain: true,
         }}
       >
         <SubmitNews />

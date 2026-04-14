@@ -14,7 +14,7 @@ def get_traditional_models():
         'random_forest': RandomForestClassifier(
             n_estimators=160,
             random_state=42,
-            n_jobs=-1,
+            n_jobs=1,
             class_weight='balanced_subsample',
             max_depth=32,
             min_samples_leaf=2,

@@ -113,7 +113,7 @@ def signup(payload: UserCreate) -> Token:
         user = user_store.create_user(
             username=payload.username,
             password=payload.password,
-            role="user",
+            role=payload.role or "user",
         )
     except ValueError as exc:
         raise HTTPException(

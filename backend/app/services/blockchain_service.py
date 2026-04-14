@@ -10,6 +10,13 @@ _mock_records: dict[str, dict] = {}
 _tx_metadata: dict[str, dict] = {}
 
 
+def _normalize_tx_hash(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return text
+    return text if text.startswith("0x") else f"0x{text}"
+
+
 class BlockchainService:
     def __init__(self) -> None:
         self._web3 = None
@@ -64,7 +71,7 @@ class BlockchainService:
 
     def store_result(self, text_hash: str, result: str, confidence: float) -> dict:
         if not self.enabled:
-            tx_hash = f"0x{uuid.uuid4().hex[:40]}"
+            tx_hash = _normalize_tx_hash(uuid.uuid4().hex[:40])
             block_number = 0
             record = {
                 "contentHash": text_hash,
@@ -94,12 +101,12 @@ class BlockchainService:
         signed_tx = self._account.sign_transaction(transaction)
         tx_hash = self._web3.eth.send_raw_transaction(signed_tx.raw_transaction)
         metadata = {
-            "txHash": tx_hash.hex(),
+            "txHash": _normalize_tx_hash(tx_hash.hex()),
             "blockNumber": None,
         }
         try:
             receipt = self._web3.eth.wait_for_transaction_receipt(tx_hash, timeout=12, poll_latency=1)
-            metadata["txHash"] = receipt.transactionHash.hex()
+            metadata["txHash"] = _normalize_tx_hash(receipt.transactionHash.hex())
             metadata["blockNumber"] = receipt.blockNumber
         except self._time_exhausted_error:
             # Sepolia confirmation time can be slow. Return the tx hash immediately
