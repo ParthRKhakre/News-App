@@ -27,11 +27,24 @@ function withinRange(dateString, range) {
 }
 
 export default function Profile() {
-  const { user, history, bookmarks, refreshProfile } = useAuth();
+  const { user, history, bookmarks, refreshProfile, pushToast } = useAuth();
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [labelFilter, setLabelFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+
+  const handleCopy = async (value, label) => {
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      pushToast(`${label} copied to clipboard.`, "success");
+    } catch {
+      pushToast(`Unable to copy ${label.toLowerCase()} right now.`, "error");
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -121,6 +134,48 @@ export default function Profile() {
                     <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                       {item.summary}
                     </p>
+                    {item.verificationId || item.txHash ? (
+                      <div className="mt-4 grid gap-3">
+                        {item.verificationId ? (
+                          <div className="rounded-2xl bg-white px-4 py-3 dark:bg-slate-900">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                                Verification hash
+                              </p>
+                              <button
+                                type="button"
+                                className="text-xs font-semibold text-blue-600 dark:text-sky-300"
+                                onClick={() => handleCopy(item.verificationId, "Verification hash")}
+                              >
+                                Copy
+                              </button>
+                            </div>
+                            <p className="mt-2 break-all font-mono text-xs text-slate-600 dark:text-slate-300">
+                              {item.verificationId}
+                            </p>
+                          </div>
+                        ) : null}
+                        {item.txHash ? (
+                          <div className="rounded-2xl bg-white px-4 py-3 dark:bg-slate-900">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                                Transaction hash
+                              </p>
+                              <button
+                                type="button"
+                                className="text-xs font-semibold text-blue-600 dark:text-sky-300"
+                                onClick={() => handleCopy(item.txHash, "Transaction hash")}
+                              >
+                                Copy
+                              </button>
+                            </div>
+                            <p className="mt-2 break-all font-mono text-xs text-slate-600 dark:text-slate-300">
+                              {item.txHash}
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                       Saved {formatRelativeTime(item.savedAt)} · {new Date(item.savedAt).toLocaleString()}
                     </p>
@@ -223,8 +278,38 @@ export default function Profile() {
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
                         Transaction
                       </p>
-                      <p className="mt-2 truncate font-mono text-sm text-slate-600 dark:text-slate-300">
-                        {entry.txHash || "Prediction only"}
+                      <div className="mt-2 flex items-center justify-between gap-3">
+                        <p className="truncate font-mono text-sm text-slate-600 dark:text-slate-300">
+                          {entry.txHash || "Prediction only"}
+                        </p>
+                        {entry.txHash ? (
+                          <button
+                            type="button"
+                            className="shrink-0 text-xs font-semibold text-blue-600 dark:text-sky-300"
+                            onClick={() => handleCopy(entry.txHash, "Transaction hash")}
+                          >
+                            Copy
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl bg-white px-4 py-3 dark:bg-slate-900 sm:col-span-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                          Verification hash
+                        </p>
+                        {entry.verificationId ? (
+                          <button
+                            type="button"
+                            className="text-xs font-semibold text-blue-600 dark:text-sky-300"
+                            onClick={() => handleCopy(entry.verificationId, "Verification hash")}
+                          >
+                            Copy
+                          </button>
+                        ) : null}
+                      </div>
+                      <p className="mt-2 break-all font-mono text-sm text-slate-600 dark:text-slate-300">
+                        {entry.verificationId || "Prediction only"}
                       </p>
                     </div>
                   </div>

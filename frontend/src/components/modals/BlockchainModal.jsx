@@ -68,6 +68,19 @@ export default function BlockchainModal({ open, result, onClose }) {
     }
   };
 
+  const handleCopy = async (value, label) => {
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      pushToast(`${label} copied to clipboard.`, "success");
+    } catch {
+      pushToast(`Unable to copy ${label.toLowerCase()} right now.`, "error");
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-3 py-4 sm:px-4"
@@ -141,7 +154,12 @@ export default function BlockchainModal({ open, result, onClose }) {
             <p className="mt-2 text-sm leading-7 text-ink dark:text-white">{summary}</p>
           </div>
           <div className="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">
-            <p className="text-sm font-semibold text-slate-500">Transaction hash</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-500">Transaction hash</p>
+              <Button variant="ghost" onClick={() => handleCopy(result.txHash, "Transaction hash")}>
+                Copy
+              </Button>
+            </div>
             <p className="mt-2 break-all font-mono text-sm text-ink dark:text-white">{result.txHash || "Not available"}</p>
             {explorerUrl ? (
               <a
@@ -155,7 +173,12 @@ export default function BlockchainModal({ open, result, onClose }) {
             ) : null}
           </div>
           <div className="rounded-3xl bg-sand p-5 dark:bg-slate-800">
-            <p className="text-sm font-semibold text-slate-500">Verification ID</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-500">Verification ID</p>
+              <Button variant="ghost" onClick={() => handleCopy(result.hash, "Verification hash")}>
+                Copy
+              </Button>
+            </div>
             <p className="mt-2 break-all font-mono text-sm text-ink dark:text-white">{result.hash || "Not available"}</p>
           </div>
           <div className="rounded-3xl bg-slate-50 p-5 dark:bg-slate-800">

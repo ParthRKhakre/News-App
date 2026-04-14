@@ -47,6 +47,19 @@ function NewsCard({
     : null;
   const confidenceTone = cachedResult?.label === "REAL" ? "bg-green-500" : "bg-red-500";
 
+  const handleCopy = async (event, value) => {
+    event.stopPropagation();
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // Compact feed buttons fail silently if clipboard access is unavailable.
+    }
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -167,6 +180,49 @@ function NewsCard({
                   : "Run a verification to view prediction confidence, explanation, and AI summary."}
               </p>
             </div>
+
+            {cachedResult?.hash || cachedResult?.txHash ? (
+              <div className="mt-5 space-y-3 rounded-3xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-950 dark:ring-slate-800">
+                {cachedResult?.hash ? (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        Verification hash
+                      </span>
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-blue-600 dark:text-sky-300"
+                        onClick={(event) => handleCopy(event, cachedResult.hash)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="mt-2 line-clamp-2 break-all font-mono text-xs text-slate-600 dark:text-slate-300">
+                      {cachedResult.hash}
+                    </p>
+                  </div>
+                ) : null}
+                {cachedResult?.txHash ? (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        Transaction hash
+                      </span>
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-blue-600 dark:text-sky-300"
+                        onClick={(event) => handleCopy(event, cachedResult.txHash)}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="mt-2 line-clamp-2 break-all font-mono text-xs text-slate-600 dark:text-slate-300">
+                      {cachedResult.txHash}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             <div className="mt-5 grid gap-3">
               <Button

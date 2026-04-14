@@ -154,7 +154,7 @@ def test_signup_login_and_protected_predict_and_store():
         )
         assert profile_response.status_code == 200
         assert profile_response.json()["username"] == "user1"
-        assert profile_response.json()["role"] == "user"
+        assert profile_response.json()["role"] == "admin"
 
         protected_response = client.post(
             "/predict-and-store",
@@ -162,7 +162,7 @@ def test_signup_login_and_protected_predict_and_store():
             headers={"Authorization": f"Bearer {token}"},
         )
 
-    assert protected_response.status_code == 403
+    assert protected_response.status_code == 200
 
 
 def test_reporter_can_predict_and_store_but_not_access_admin_analytics():

@@ -25,7 +25,7 @@ test("verify page loads blockchain record", async () => {
   await user.type(screen.getByLabelText(/verification hash/i), "known-hash");
   await user.click(screen.getByRole("button", { name: /verify/i }));
 
-  await waitFor(() => expect(screen.getByText("FAKE")).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText(/likely fake/i)).toBeInTheDocument());
   expect(verifyHash).toHaveBeenCalled();
   expect(screen.getByText("92.00%")).toBeInTheDocument();
 });
