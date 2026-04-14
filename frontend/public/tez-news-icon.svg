@@ -1,0 +1,44 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="36" y1="26" x2="220" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#102A5C"/>
+      <stop offset="1" stop-color="#0B1220"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(84 72) rotate(52.626) scale(72.5453 85.7669)">
+      <stop stop-color="#38BDF8" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(184 190) rotate(180) scale(88 78)">
+      <stop stop-color="#F97316" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#F97316" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panel" x1="88" y1="84" x2="168" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <filter id="shadow" x="20" y="18" width="216" height="220" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="14"/>
+      <feGaussianBlur stdDeviation="12"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0117647 0 0 0 0 0.0509804 0 0 0 0 0.145098 0 0 0 0.3 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="32" y="24" width="192" height="192" rx="54" fill="url(#bg)"/>
+    <rect x="32" y="24" width="192" height="192" rx="54" fill="url(#glowA)"/>
+    <rect x="32" y="24" width="192" height="192" rx="54" fill="url(#glowB)"/>
+    <rect x="33" y="25" width="190" height="190" rx="53" stroke="white" stroke-opacity="0.08" stroke-width="2"/>
+  </g>
+
+  <path d="M128 48L174 66V104C174 132.08 155.92 156.24 128 169C100.08 156.24 82 132.08 82 104V66L128 48Z" fill="white"/>
+  <path d="M96 84C96 78.4772 100.477 74 106 74H150C155.523 74 160 78.4772 160 84V112C160 117.523 155.523 122 150 122H106C100.477 122 96 117.523 96 112V84Z" fill="url(#panel)"/>
+  <path d="M109 89H147" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <path d="M109 103H139" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.92"/>
+  <path d="M106 138L119 150L145 124" stroke="#F59E0B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
